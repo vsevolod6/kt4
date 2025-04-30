@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Slider</title>
+    <style>
+        .slider-container {
+            width: 300px;
+            margin: 50px auto;
+            position: relative;
+        }
+        
+        .slider-track {
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .slider-divisor {
+            position: absolute;
+            top: -8px;
+            width: 1px;
+            height: 20px;
+            background: #999;
+        }
+        
+        .slider-thumb {
+            width: 20px;
+            height: 20px;
+            background: #4CAF50;
+            border-radius: 50%;
+            position: absolute;
+            top: -8px;
+            left: 0;
+            cursor: pointer;
+            transform: translateX(-50%);
+        }
+        
+        .slider-value {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .slider-tick {
+            position: absolute;
+            bottom: -15px;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="slider-container">
+        <div class="slider-track" id="sliderTrack">
+            <!-- Треки и значения будут добавлены через JS -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sliderTrack = document.getElementById('sliderTrack');
+            const min = 0;
+            const max = 100;
+            const step = 20;
+            
+            // Создаем деления на треке
+            for (let i = min; i <= max; i += step) {
+                // Создаем вертикальные линии-делители
+                const divisor = document.createElement('div');
+                divisor.className = 'slider-divisor';
+                divisor.style.left = `${(i / max) * 100}%`;
+                sliderTrack.appendChild(divisor);
+                
+                // Создаем подписи значений
+                const tick = document.createElement('div');
+                tick.className = 'slider-tick';
+                tick.style.left = `${(i / max) * 100}%`;
+                tick.textContent = i;
+                sliderTrack.appendChild(tick);
+            }
+            
+            // Создаем бегунок
+            const thumb = document.createElement('div');
+            thumb.className = 'slider-thumb';
+            thumb.id = 'sliderThumb';
+            sliderTrack.appendChild(thumb);
+            
+            // Создаем отображение значения
+            const valueDisplay = document.createElement('div');
+            valueDisplay.className = 'slider-value';
+            valueDisplay.id = 'sliderValue';
+            valueDisplay.textContent = min;
+            thumb.appendChild(valueDisplay);
+            
+            // Устанавливаем начальное положение
+            updateSlider(min);
+            
+            // Обработчики событий для перемещения бегунка
+            let isDragging = false;
+            
+            thumb.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                e.preventDefault(); // Предотвращаем выделение текста
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const trackRect = sliderTrack.getBoundingClientRect();
+                let newPosition = (e.clientX - trackRect.left) / trackRect.width;
+                
+                // Ограничиваем положение в пределах трека
+                newPosition = Math.max(0, Math.min(1, newPosition));
+                
+                // Рассчитываем значение
+                const value = Math.round(newPosition * (max - min) + min);
+                updateSlider(value);
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            
+            // Обработчик клика по треку
+            sliderTrack.addEventListener('click', function(e) {
+                const trackRect = sliderTrack.getBoundingClientRect();
+                const newPosition = (e.clientX - trackRect.left) / trackRect.width;
+                const value = Math.round(newPosition * (max - min) + min);
+                updateSlider(value);
+            });
+            
+            function updateSlider(value) {
+                const percentage = ((value - min) / (max - min)) * 100;
+                const thumb = document.getElementById('sliderThumb');
+                const valueDisplay = document.getElementById('sliderValue');
+                
+                thumb.style.left = `${percentage}%`;
+                valueDisplay.textContent = value;
+            }
+        });
+    </script>
+</body>
+</html>
